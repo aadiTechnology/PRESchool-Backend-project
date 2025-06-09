@@ -1,0 +1,1 @@
+Add migration scripts here using `alembic revision --autogenerate -m 'Initial'`
