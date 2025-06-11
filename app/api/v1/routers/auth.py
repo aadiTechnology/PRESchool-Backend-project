@@ -4,8 +4,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.schemas.user import UserCreate, UserOut
 from app.db.session import get_db
-from app.utils.security import get_password_hash
-from app.models.user import User
+from app.services.user_service import create_user
 
 router = APIRouter()
 
@@ -13,19 +12,7 @@ router = APIRouter()
 @router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     try:
-        hashedPassword = get_password_hash(user.password)
-        db_user = User(
-            firstName=user.firstName,
-            lastName=user.lastName,
-            email=user.email,
-            phone=user.phone,
-            hashedPassword=hashedPassword,
-            role=user.role, 
-            preschoolId=user.preschoolId
-        )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        db_user = create_user(db, user)
         return db_user
     except IntegrityError as e:
         db.rollback()

@@ -11,7 +11,12 @@ def create_user(db: Session, user: UserCreate):
         phone=user.phone,
         hashedPassword=get_password_hash(user.password),
         role=user.role,
-        preschoolId=user.preschoolId  # <-- Add this line
+        preschoolId=user.preschoolId,
+        subject=user.subject if user.role == 2 else None,
+        qualification=user.qualification if user.role == 2 else None,
+        childName=user.childName if user.role == 3 else None,
+        childAge=user.childAge if user.role == 3 else None,
+        childClass=user.childClass if user.role == 3 else None,
     )
     db.add(db_user)
     db.commit()
