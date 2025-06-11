@@ -13,21 +13,23 @@ router = APIRouter()
 @router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     try:
-        hashed_password = get_password_hash(user.password)
+        hashedPassword = get_password_hash(user.password)
         db_user = User(
-            first_name=user.first_name,
-            last_name=user.last_name,
+            firstName=user.firstName,
+            lastName=user.lastName,
             email=user.email,
             phone=user.phone,
-            hashed_password=hashed_password,
-            role=user.role,  # <-- Add this line
+            hashedPassword=hashedPassword,
+            role=user.role, 
+            preschoolId=user.preschoolId
         )
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
         return db_user
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
+        print("IntegrityError:", e)  # For debugging; use logging in production
         raise HTTPException(status_code=400, detail="Email already registered")
     except Exception as e:
         db.rollback()

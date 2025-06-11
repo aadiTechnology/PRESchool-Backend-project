@@ -15,7 +15,7 @@ class LoginRequest(BaseModel):
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
-    if not user or not verify_password(request.password, user.hashed_password):
+    if not user or not verify_password(request.password, user.hashedPassword):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token = create_access_token(data={"sub": user.email, "role": user.role})
     return {
