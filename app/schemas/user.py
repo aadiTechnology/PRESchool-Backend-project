@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
     preschoolId: Optional[int] = 0
 
     # Teacher-specific fields
-    subject: Optional[str] = None
+    className: Optional[str] = None
     qualification: Optional[str] = None
 
     # Parent-specific fields
@@ -23,8 +23,8 @@ class UserCreate(BaseModel):
     @model_validator(mode="after")
     def check_role_fields(self):
         if self.role == 2:
-            if not self.subject:
-                raise ValueError('subject is required for Teacher registration')
+            if not self.className:
+                raise ValueError('className is required for Teacher registration')
             if not self.qualification:
                 raise ValueError('qualification is required for Teacher registration')
         if self.role == 3:
@@ -44,7 +44,7 @@ class UserOut(BaseModel):
     phone: str
     role: int
     preschoolId: Optional[int] = 0
-    subject: Optional[str] = None
+    className: Optional[str] = None
     qualification: Optional[str] = None
     childName: Optional[str] = None
     childAge: Optional[int] = None
@@ -60,7 +60,7 @@ class UserUpdate(BaseModel):
     phone: Optional[str]
     password: Optional[str]
     preschoolId: Optional[int]
-    subject: Optional[str] = None
+    className: Optional[str] = None
     qualification: Optional[str] = None
     childName: Optional[str] = None
     childAge: Optional[int] = None

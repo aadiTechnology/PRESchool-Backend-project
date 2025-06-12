@@ -12,7 +12,7 @@ class User(Base):
     role = Column(String, default="user")
     preschoolId = Column(Integer, ForeignKey("preschools.id"))
     # Teacher fields
-    subject = Column(String, nullable=True)
+    className = Column(String, nullable=True)
     qualification = Column(String, nullable=True)
     # Parent fields
     childName = Column(String, nullable=True)

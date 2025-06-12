@@ -12,7 +12,7 @@ def create_user(db: Session, user: UserCreate):
         hashedPassword=get_password_hash(user.password),
         role=user.role,
         preschoolId=user.preschoolId,
-        subject=user.subject if user.role == 2 else None,
+        className=user.className if user.role == 2 else None,
         qualification=user.qualification if user.role == 2 else None,
         childName=user.childName if user.role == 3 else None,
         childAge=user.childAge if user.role == 3 else None,
