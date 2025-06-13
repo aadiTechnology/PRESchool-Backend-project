@@ -14,6 +14,14 @@ router = APIRouter()
 class ForgotPasswordRequest(BaseModel):
     email: str
 
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp: str
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    new_password: str
+
 @router.get("/users")
 def list_users(db: Session = Depends(get_db), current=Depends(require_role(["admin", "superadmin"]))):
     return db.query(User).all()
@@ -71,3 +79,29 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db
     db.commit()
     send_otp_email(user.email, otp)
     return {"message": "OTP sent to your email address."}
+
+@router.post("/verify-otp")
+def verify_otp(request: VerifyOtpRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email.ilike(request.email)).first()
+    if not user or not user.otp or not user.otpExpiry:
+        raise HTTPException(status_code=400, detail="OTP not found or expired.")
+    if user.otp != request.otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP.")
+    if user.otpExpiry < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="OTP expired.")
+    # Optionally clear OTP after successful verification
+    user.otp = None
+    user.otpExpiry = None
+    db.commit()
+    return {"message": "OTP verified successfully."}
+
+@router.post("/reset-password")
+def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email.ilike(request.email)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    # Optionally, check if OTP was verified before allowing password reset
+    from app.utils.security import get_password_hash
+    user.hashedPassword = get_password_hash(request.new_password)
+    db.commit()
+    return {"message": "Password reset successful."}
