@@ -38,4 +38,5 @@ def require_role(required_roles):
     return role_checker
 
 def generate_otp(length=6):
-    return ''.join(random.choices('0123456789', k=length))
+    import random
+    return ''.join([str(random.randint(0, 9)) for _ in range(length)])

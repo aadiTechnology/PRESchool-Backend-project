@@ -64,8 +64,10 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db
     if not user:
         raise HTTPException(status_code=404, detail="Email not found. Try again.")
     otp = generate_otp()
+    print("Generated OTP:", otp)
     user.otp = otp
-    user.otp_expiry = datetime.utcnow() + timedelta(minutes=10)
+    user.otpExpiry = datetime.utcnow() + timedelta(minutes=10)
+    print("User OTP before commit:", user.otp)
     db.commit()
-    send_otp_email(user.email, otp)  # Use the utility function here
+    send_otp_email(user.email, otp)
     return {"message": "OTP sent to your email address."}
