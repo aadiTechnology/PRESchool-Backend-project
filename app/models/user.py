@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.db.session import Base
+import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -18,3 +19,5 @@ class User(Base):
     childName = Column(String, nullable=True)
     childAge = Column(Integer, nullable=True)
     childClass = Column(String, nullable=True)
+    otp = Column(String, nullable=True)
+    otpExpiry = Column(DateTime, nullable=True)

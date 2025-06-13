@@ -2,13 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
-from app.utils.security import get_current_user
+from app.utils.security import get_current_user, require_role
 from app.schemas.user import UserOut, UserUpdate
+from pydantic import BaseModel
+from datetime import datetime, timedelta
+from app.utils.security import generate_otp
+from app.utils.email_utils import send_otp_email
 
 router = APIRouter()
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
 @router.get("/users")
-def list_users(db: Session = Depends(get_db)):
+def list_users(db: Session = Depends(get_db), current=Depends(require_role(["admin", "superadmin"]))):
     return db.query(User).all()
 
 @router.delete("/users/{user_id}")
@@ -50,3 +57,15 @@ def get_user(user_id: int, db: Session = Depends(get_db), current=Depends(get_cu
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email.ilike(request.email)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Email not found. Try again.")
+    otp = generate_otp()
+    user.otp = otp
+    user.otp_expiry = datetime.utcnow() + timedelta(minutes=10)
+    db.commit()
+    send_otp_email(user.email, otp)  # Use the utility function here
+    return {"message": "OTP sent to your email address."}

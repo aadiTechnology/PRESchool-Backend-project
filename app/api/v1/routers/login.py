@@ -22,8 +22,11 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
+            "id": user.id,  # <-- Add user id for frontend routing if needed
             "email": user.email,
-            "role": user.role,
+            "role": user.role,  # <-- Ensure role is returned
+            "firstName": user.firstName,
+            "lastName": user.lastName,
             # add any other fields you want to expose
         }
     }
