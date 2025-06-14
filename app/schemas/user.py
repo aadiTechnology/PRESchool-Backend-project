@@ -36,6 +36,19 @@ class UserCreate(BaseModel):
                 raise ValueError('childClass is required for Parent registration')
         return self
 
+class UserUpdate(BaseModel):
+    firstName: Optional[str]
+    lastName: Optional[str]
+    email: Optional[str]
+    phone: Optional[str]
+    password: Optional[str]
+    preschoolId: Optional[int]
+    className: Optional[str] = None
+    qualification: Optional[str] = None
+    childName: Optional[str] = None
+    childAge: Optional[int] = None
+    childClass: Optional[str] = None
+
 class UserOut(BaseModel):
     id: int
     firstName: str
@@ -52,16 +65,3 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
-
-class UserUpdate(BaseModel):
-    firstName: Optional[str]
-    lastName: Optional[str]
-    email: Optional[str]
-    phone: Optional[str]
-    password: Optional[str]
-    preschoolId: Optional[int]
-    className: Optional[str] = None
-    qualification: Optional[str] = None
-    childName: Optional[str] = None
-    childAge: Optional[int] = None
-    childClass: Optional[str] = None
