@@ -3,14 +3,16 @@ from pydantic import BaseModel, Field
 from datetime import date
 
 class HomeworkCreate(BaseModel):
-    className: str = Field(..., description="Class name")
+    divisionId: int = Field(..., description="Division ID")  # <-- NEW
+    subjectId: int = Field(..., description="Subject ID")
     homeworkDate: date
     instructions: str
     attachments: Optional[List[str]] = []
 
 class HomeworkOut(BaseModel):
     id: int
-    className: str
+    divisionId: int  # <-- NEW
+    subjectId: int
     homeworkDate: date
     instructions: str
     attachments: List[str]

@@ -4,7 +4,8 @@ from app.models.user import User
 
 def create_homework(db: Session, data, teacher: User, preschool_id: int):
     homework = Homework(
-        className=data.className,
+        divisionId=data.divisionId,  # <-- NEW
+        subjectId=data.subjectId,
         homeworkDate=data.homeworkDate,
         instructions=data.instructions,
         attachments=",".join(data.attachments),

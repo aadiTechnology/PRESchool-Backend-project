@@ -14,20 +14,19 @@ async def assign_homework_json(
     db: Session = Depends(get_db),
     current=Depends(require_role([2]))
 ):
-    if not data.className or not data.instructions or not data.homeworkDate:
-        raise HTTPException(status_code=400, detail="Please select class, enter instructions, and select a date.")
+    if not data.divisionId or not data.instructions or not data.homeworkDate or not data.subjectId:
+        raise HTTPException(status_code=400, detail="Please select division, subject, enter instructions, and select a date.")
 
     teacher = db.query(User).filter(User.id == current["id"]).first()
     if not teacher:
         raise HTTPException(status_code=403, detail="Teacher not found")
     preschool_id = teacher.preschoolId
 
-    # File upload code can be added here if you want to support file uploads in the future
-
     homework = create_homework(db, data, teacher, preschool_id)
     return HomeworkOut(
         id=homework.id,
-        className=homework.className,
+        divisionId=homework.divisionId,
+        subjectId=homework.subjectId,
         homeworkDate=homework.homeworkDate,
         instructions=homework.instructions,
         attachments=homework.attachments.split(",") if homework.attachments else [],

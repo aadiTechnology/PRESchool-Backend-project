@@ -21,7 +21,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "sub": user.email,
         "role": user.role,
         "id": user.id,
-        "preschoolId": user.preschoolId  # <-- Add this line
+        "preschoolId": user.preschoolId,
+        "classId": user.classId,         # <-- Add this line (ensure user model has this field)
+        "divisionId": user.divisionId    # <-- Add this line (ensure user model has this field)
     })
     return {
         "access_token": access_token,
@@ -30,7 +32,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "id": user.id,
             "email": user.email,
             "role": user.role,
-            "preschoolId": user.preschoolId,  # <-- Add this line (optional, for frontend)
+            "preschoolId": user.preschoolId,
+            "classId": user.classId,         # <-- Add this line
+            "divisionId": user.divisionId,   # <-- Add this line
             "firstName": user.firstName,
             "lastName": user.lastName,
         }
