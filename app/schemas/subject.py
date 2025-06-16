@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class SubjectOut(BaseModel):
     id: int
     name: str
-    className: str
+    classId: int        # <-- ADD this line
     preschoolId: int
 
     class Config:
