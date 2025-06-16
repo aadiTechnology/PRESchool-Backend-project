@@ -69,3 +69,22 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+class UserListOut(BaseModel):
+    id: int
+    firstName: str
+    lastName: str
+    email: str
+    phone: str
+    role: int
+    preschoolId: Optional[int] = 0
+    classId: Optional[int] = None
+    divisionId: Optional[int] = None
+    className: Optional[str] = None         # <-- Add this
+    divisionName: Optional[str] = None      # <-- Add this
+    qualification: Optional[str] = None
+    childName: Optional[str] = None
+    childAge: Optional[int] = None
+
+    class Config:
+        orm_mode = True

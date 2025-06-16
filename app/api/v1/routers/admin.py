@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
+from app.models.class_ import Class_
+from app.models.division import Division
 from app.utils.security import get_current_user, require_role
-from app.schemas.user import UserOut, UserUpdate, UserCreate
+from app.schemas.user import UserOut, UserUpdate, UserCreate, UserListOut
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from app.utils.security import generate_otp
@@ -23,9 +25,25 @@ class ResetPasswordRequest(BaseModel):
     email: str
     new_password: str
 
-@router.get("/users", response_model=list[UserOut])
+@router.get("/users", response_model=list[UserListOut])
 def list_users(db: Session = Depends(get_db), current=Depends(require_role([0, 1]))):  # 0=superadmin, 1=admin
-    return db.query(User).all()
+    users = (
+        db.query(
+            User,
+            Class_.name.label("className"),
+            Division.name.label("divisionName")
+        )
+        .outerjoin(Class_, User.classId == Class_.id)
+        .outerjoin(Division, User.divisionId == Division.id)
+        .all()
+    )
+    result = []
+    for user, className, divisionName in users:
+        user_dict = user.__dict__.copy()
+        user_dict["className"] = className
+        user_dict["divisionName"] = divisionName
+        result.append(UserListOut(**user_dict))
+    return result
 
 @router.post("/users", response_model=UserOut)
 def add_user(user: UserCreate, db: Session = Depends(get_db), current=Depends(require_role([0, 1]))):
