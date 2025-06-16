@@ -15,6 +15,7 @@ class User(Base):
     classId = Column(Integer, ForeignKey("classes.id"), nullable=True)
     divisionId = Column(Integer, ForeignKey("divisions.id"), nullable=True)
     # Teacher fields
+    className = Column(String, nullable=True)
     qualification = Column(String, nullable=True)
     # Parent fields
     childName = Column(String, nullable=True)
