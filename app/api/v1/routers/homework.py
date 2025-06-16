@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
 from app.schemas.homework import HomeworkCreate, HomeworkOut, HomeworkUpdate
@@ -114,6 +114,28 @@ def edit_homework(
 
     db.commit()
     db.refresh(homework)
+    subject = db.query(Subject).filter(Subject.id == homework.subjectId).first()
+    return HomeworkOut(
+        id=homework.id,
+        divisionId=homework.divisionId,
+        subjectId=homework.subjectId,
+        homeworkDate=homework.homeworkDate,
+        instructions=homework.instructions,
+        attachments=homework.attachments.split(",") if homework.attachments else [],
+        teacherId=homework.teacherId,
+        preschoolId=homework.preschoolId,
+        subjectName=subject.name if subject else None
+    )
+
+@router.get("/homeworks/{homework_id}", response_model=HomeworkOut)
+def get_homework(
+    homework_id: int = Path(..., description="The ID of the homework to retrieve"),
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    homework = db.query(Homework).filter(Homework.id == homework_id).first()
+    if not homework:
+        raise HTTPException(status_code=404, detail="Homework not found")
     subject = db.query(Subject).filter(Subject.id == homework.subjectId).first()
     return HomeworkOut(
         id=homework.id,
