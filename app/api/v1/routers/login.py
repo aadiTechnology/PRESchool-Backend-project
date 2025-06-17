@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.db.session import get_db
 from app.models.user import User
+from app.models.class_ import Class_
 from app.utils.security import verify_password
 from app.core.jwt import create_access_token
 
@@ -17,13 +18,20 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
     if not user or not verify_password(request.password, user.hashedPassword):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Fetch className if classId is present
+    class_name = None
+    if user.classId:
+        class_obj = db.query(Class_).filter(Class_.id == user.classId).first()
+        class_name = class_obj.name if class_obj else None
+
     access_token = create_access_token(data={
         "sub": user.email,
         "role": user.role,
         "id": user.id,
         "preschoolId": user.preschoolId,
-        "classId": user.classId,         # <-- Add this line (ensure user model has this field)
-        "divisionId": user.divisionId    # <-- Add this line (ensure user model has this field)
+        "classId": user.classId,
+        "divisionId": user.divisionId
     })
     return {
         "access_token": access_token,
@@ -33,9 +41,10 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "email": user.email,
             "role": user.role,
             "preschoolId": user.preschoolId,
-            "classId": user.classId,         # <-- Add this line
-            "divisionId": user.divisionId,   # <-- Add this line
+            "classId": user.classId,
+            "divisionId": user.divisionId,
             "firstName": user.firstName,
             "lastName": user.lastName,
+            "className": class_name   # <-- Add this line
         }
     }
