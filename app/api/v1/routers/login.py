@@ -10,12 +10,14 @@ from app.core.jwt import create_access_token
 router = APIRouter()
 
 class LoginRequest(BaseModel):
-    email: str
+    user_id: str  # can be email or phone
     password: str
 
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == request.email).first()
+    user = db.query(User).filter(
+        (User.email == request.user_id) | (User.phone == request.user_id)
+    ).first()
     if not user or not verify_password(request.password, user.hashedPassword):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
