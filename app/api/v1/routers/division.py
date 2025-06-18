@@ -11,3 +11,7 @@ router = APIRouter()
 def list_divisions(classId: int, db: Session = Depends(get_db), current=Depends(get_current_user)):
     preschool_id = current["preschoolId"]
     return get_divisions_for_class(db, preschool_id, classId)
+
+@router.get("/public-divisions", response_model=list[DivisionOut])
+def public_list_divisions(preschoolId: int, classId: int, db: Session = Depends(get_db)):
+    return get_divisions_for_class(db, preschool_id=preschoolId, class_id=classId)

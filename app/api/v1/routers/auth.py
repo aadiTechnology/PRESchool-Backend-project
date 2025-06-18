@@ -11,6 +11,8 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
+  # Force role to 3 (Parent)
+    user.role = 3
     try:
         db_user = create_user(db, user)
         return db_user
