@@ -96,7 +96,10 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db
     print("User OTP before commit:", user.otp)
     db.commit()
     send_otp_email(user.email, otp)
-    return {"message": "OTP sent to your email address."}
+    return {
+        "message": "OTP sent to your email address.",
+        "otp": otp  # <-- Return the OTP in the response
+    }
 
 @router.post("/verify-otp")
 def verify_otp(request: VerifyOtpRequest, db: Session = Depends(get_db)):
