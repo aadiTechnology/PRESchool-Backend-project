@@ -56,10 +56,12 @@ def list_homeworks(
     else:
         raise HTTPException(status_code=403, detail="Access denied")
 
+    # Order by homeworkDate descending
+    query = query.order_by(Homework.homeworkDate.desc())
+
     results = query.all()
     output = []
     for hw, subject_name in results:
-        # Convert attachments string to list
         attachments_list = hw.attachments.split(",") if hw.attachments else []
         hw_dict = HomeworkOut(
             id=hw.id,
