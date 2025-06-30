@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, File, UploadFile, Form
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
 from app.schemas.homework import HomeworkCreate, HomeworkOut, HomeworkUpdate
@@ -7,22 +7,51 @@ from app.models.subject import Subject
 from app.models.user import User
 from app.utils.security import require_role, get_current_user
 from app.services.homework_service import create_homework
+from app.core.config import settings
+import os
+from datetime import datetime
 
 router = APIRouter()
 
 @router.post("/assign-homework", response_model=HomeworkOut)
 async def assign_homework_json(
-    data: HomeworkCreate,
+    divisionId: int = Form(...),
+    subjectId: int = Form(...),
+    homeworkDate: str = Form(...),
+    instructions: str = Form(...),
+    attachments: list[UploadFile] = File([]),
     db: Session = Depends(get_db),
     current=Depends(require_role([2]))
 ):
-    if not data.divisionId or not data.instructions or not data.homeworkDate or not data.subjectId:
+    # Validate required fields
+    if not divisionId or not instructions or not homeworkDate or not subjectId:
         raise HTTPException(status_code=400, detail="Please select division, subject, enter instructions, and select a date.")
 
     teacher = db.query(User).filter(User.id == current["id"]).first()
     if not teacher:
         raise HTTPException(status_code=403, detail="Teacher not found")
     preschool_id = teacher.preschoolId
+
+    # Save files
+    upload_dir = settings.HOMEWORK_UPLOAD_DIR
+    os.makedirs(upload_dir, exist_ok=True)
+    saved_filenames = []
+    for file in attachments:
+        filename = f"{int(datetime.now().timestamp())}_{file.filename}"
+        file_path = os.path.join(upload_dir, filename)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        saved_filenames.append(filename)
+
+    # Prepare data for service
+    class DummyData:
+        pass
+    data = DummyData()
+    data.divisionId = divisionId
+    data.subjectId = subjectId
+    data.homeworkDate = homeworkDate
+    data.instructions = instructions
+    data.attachments = saved_filenames
 
     homework = create_homework(db, data, teacher, preschool_id)
     return HomeworkOut(
@@ -42,8 +71,6 @@ def list_homeworks(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
-    from app.models.subject import Subject
-
     query = db.query(
         Homework,
         Subject.name.label("subjectName")
@@ -93,10 +120,16 @@ def delete_homework(
     db.commit()
     return {"message": "Homework deleted"}
 
+from fastapi import Form, UploadFile, File
+
 @router.put("/homeworks/{homework_id}", response_model=HomeworkOut)
-def edit_homework(
+async def edit_homework(
     homework_id: int,
-    data: HomeworkUpdate,
+    divisionId: int = Form(...),
+    subjectId: int = Form(...),
+    homeworkDate: str = Form(...),
+    instructions: str = Form(...),
+    attachments: list[UploadFile] = File([]),
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -106,13 +139,27 @@ def edit_homework(
     if current["role"] == 2 and homework.teacherId != current["id"]:
         raise HTTPException(status_code=403, detail="Not allowed")
 
-    # Only update provided fields
-    update_data = data.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        if field == "attachments" and value is not None:
-            setattr(homework, field, ",".join(value))
-        elif value is not None:
-            setattr(homework, field, value)
+    # Save new files
+    upload_dir = settings.HOMEWORK_UPLOAD_DIR
+    os.makedirs(upload_dir, exist_ok=True)
+    saved_filenames = []
+    for file in attachments:
+        filename = f"{int(datetime.now().timestamp())}_{file.filename}"
+        file_path = os.path.join(upload_dir, filename)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        saved_filenames.append(filename)
+
+    # Merge with existing attachments
+    existing_files = homework.attachments.split(",") if homework.attachments else []
+    all_files = existing_files + saved_filenames
+
+    # Update fields
+    homework.divisionId = divisionId
+    homework.subjectId = subjectId
+    homework.homeworkDate = homeworkDate
+    homework.instructions = instructions
+    homework.attachments = ",".join(all_files)
 
     db.commit()
     db.refresh(homework)
