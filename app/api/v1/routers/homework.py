@@ -56,7 +56,7 @@ async def assign_homework_json(
 
     homework = create_homework(db, data, teacher, preschool_id)
     tenant_id = str(current["preschoolId"])
-    base_url = f"{str(settings.HOMEWORK_UPLOAD_DIR).replace('uploads', str('/uploads'))}/{tenant_id}/"
+    base_url = f"{settings.API_URL}/{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
     # Or, if you want the full URL:
     # base_url = f"{request.base_url}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
 
