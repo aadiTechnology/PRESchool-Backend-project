@@ -33,7 +33,8 @@ async def assign_homework_json(
     preschool_id = teacher.preschoolId
 
     # Save files
-    upload_dir = settings.HOMEWORK_UPLOAD_DIR
+    tenant_id = str(current["preschoolId"])  # Get tenant id from the current user/session
+    upload_dir = os.path.join(settings.HOMEWORK_UPLOAD_DIR, tenant_id)
     os.makedirs(upload_dir, exist_ok=True)
     saved_filenames = []
     for file in attachments:
@@ -140,7 +141,8 @@ async def edit_homework(
         raise HTTPException(status_code=403, detail="Not allowed")
 
     # Save new files
-    upload_dir = settings.HOMEWORK_UPLOAD_DIR
+    tenant_id = str(current["preschoolId"])  # Get tenant id from the current user/session
+    upload_dir = os.path.join(settings.HOMEWORK_UPLOAD_DIR, tenant_id)
     os.makedirs(upload_dir, exist_ok=True)
     saved_filenames = []
     for file in attachments:
