@@ -18,6 +18,7 @@ class HomeworkOut(BaseModel):
     attachments: List[str]
     teacherId: int
     preschoolId: int
+    baseUrl:str
     subjectName: Optional[str] = None
 
     class Config:

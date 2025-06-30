@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, Path, File, UploadFile, Form, Request
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
 from app.schemas.homework import HomeworkCreate, HomeworkOut, HomeworkUpdate
@@ -69,6 +69,7 @@ async def assign_homework_json(
 @router.get("/homeworks", response_model=list[HomeworkOut])
 def list_homeworks(
     divisionId: int,
+    request: Request,  # <-- Add this
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -89,6 +90,8 @@ def list_homeworks(
 
     results = query.all()
     output = []
+    tenant_id = str(current["preschoolId"])
+    base_url = f"{request.base_url}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
     for hw, subject_name in results:
         attachments_list = hw.attachments.split(",") if hw.attachments else []
         hw_dict = HomeworkOut(
@@ -100,8 +103,10 @@ def list_homeworks(
             attachments=attachments_list,
             teacherId=hw.teacherId,
             preschoolId=hw.preschoolId,
-            subjectName=subject_name
+            subjectName=subject_name,
+            baseUrl=base_url
         ).dict()
+        hw_dict["baseUrl"] = base_url  # <-- Add baseUrl to each homework
         output.append(hw_dict)
     return output
 
@@ -180,6 +185,7 @@ async def edit_homework(
 
 @router.get("/homeworks/{homework_id}", response_model=HomeworkOut)
 def get_homework(
+    request: Request,
     homework_id: int = Path(..., description="The ID of the homework to retrieve"),
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
@@ -188,6 +194,8 @@ def get_homework(
     if not homework:
         raise HTTPException(status_code=404, detail="Homework not found")
     subject = db.query(Subject).filter(Subject.id == homework.subjectId).first()
+    tenant_id = str(current["preschoolId"])
+    base_url = f"{request.base_url}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
     return HomeworkOut(
         id=homework.id,
         divisionId=homework.divisionId,
@@ -197,5 +205,6 @@ def get_homework(
         attachments=homework.attachments.split(",") if homework.attachments else [],
         teacherId=homework.teacherId,
         preschoolId=homework.preschoolId,
-        subjectName=subject.name if subject else None
+        subjectName=subject.name if subject else None,
+        baseUrl=base_url
     )
