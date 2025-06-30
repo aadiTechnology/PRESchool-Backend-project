@@ -55,6 +55,11 @@ async def assign_homework_json(
     data.attachments = saved_filenames
 
     homework = create_homework(db, data, teacher, preschool_id)
+    tenant_id = str(current["preschoolId"])
+    base_url = f"{str(settings.HOMEWORK_UPLOAD_DIR).replace('uploads', str('/uploads'))}/{tenant_id}/"
+    # Or, if you want the full URL:
+    # base_url = f"{request.base_url}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
+
     return HomeworkOut(
         id=homework.id,
         divisionId=homework.divisionId,
@@ -63,7 +68,8 @@ async def assign_homework_json(
         instructions=homework.instructions,
         attachments=homework.attachments.split(",") if homework.attachments else [],
         teacherId=homework.teacherId,
-        preschoolId=homework.preschoolId
+        preschoolId=homework.preschoolId,
+        baseUrl=base_url
     )
 
 @router.get("/homeworks", response_model=list[HomeworkOut])
