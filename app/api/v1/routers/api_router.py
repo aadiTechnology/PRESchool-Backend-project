@@ -9,6 +9,7 @@ from app.api.v1.routers import class_  # <-- Add this import
 from app.api.v1.routers import division
 from app.api.v1.routers import holidaysEvents  # <-- Add this import
 from app.api.v1.routers import notice
+from app.api.v1.routers import syllabus
 
 api_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_router.include_router(class_.router, tags=["class"])
 api_router.include_router(division.router, tags=["division"])
 api_router.include_router(holidaysEvents.router, tags=["holidaysEvents"])  # <-- Add this line
 api_router.include_router(notice.router, tags=["notice"])
+api_router.include_router(syllabus.router, tags=["syllabus"])
