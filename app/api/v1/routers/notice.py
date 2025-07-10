@@ -63,7 +63,12 @@ def edit_notice(
         raise HTTPException(status_code=404, detail="Notice not found")
     notice = update_notice(db, notice, data)
     className = "All Classes" if notice.classId is None else None
-    return NoticeOut(**notice.__dict__, className=className)
+
+    # Always convert attachments to list for NoticeOut
+    notice_dict = notice.__dict__.copy()
+    notice_dict["attachments"] = notice.attachments.split(",") if notice.attachments else []
+    notice_dict["className"] = className
+    return NoticeOut(**notice_dict)
 
 @router.delete("/notices/{notice_id}")
 def delete_notice_api(
