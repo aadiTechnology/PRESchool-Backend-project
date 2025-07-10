@@ -22,17 +22,39 @@ def add_notice(
 
 @router.get("/notices", response_model=list[NoticeOut])
 def list_notices(
+    classId: int = None,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
     # Admin: all notices for preschool; Parent: only for their class/all
-    if current["role"] in [0, 1]:
-        notices = list_notices_admin(db, preschool_id=current["preschoolId"])
+    if current["role"] in [0, 1, 2]:
+        query = db.query(Notice).filter(Notice.preschoolId == current["preschoolId"])
+        if classId is not None:
+            query = query.filter((Notice.classId == classId) | (Notice.classId == None))
+        notices = query.order_by(Notice.date.desc()).all()
+        result = []
+        for notice in notices:
+            notice_dict = notice.__dict__.copy()
+            notice_dict["attachments"] = notice.attachments.split(",") if notice.attachments else []
+            notice_dict["className"] = "All Classes" if notice.classId is None else None
+            result.append(notice_dict)
+        return [NoticeOut(**n) for n in result]
     elif current["role"] == 3:
-        notices = list_notices_parent(db, preschool_id=current["preschoolId"], class_id=current["classId"])
+        # For parent, use their classId
+        query = db.query(Notice).filter(
+            Notice.preschoolId == current["preschoolId"],
+            ((Notice.classId == current["classId"]) | (Notice.classId == None))
+        )
+        notices = query.order_by(Notice.date.desc()).all()
+        result = []
+        for notice in notices:
+            notice_dict = notice.__dict__.copy()
+            notice_dict["attachments"] = notice.attachments.split(",") if notice.attachments else []
+            notice_dict["className"] = "All Classes" if notice.classId is None else None
+            result.append(notice_dict)
+        return [NoticeOut(**n) for n in result]
     else:
         raise HTTPException(status_code=403, detail="Access denied")
-    return [NoticeOut(**n) for n in notices]
 
 @router.get("/notices/{notice_id}", response_model=NoticeOut)
 def get_notice_api(
