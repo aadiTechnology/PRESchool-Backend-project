@@ -26,6 +26,7 @@ class NoticeOut(NoticeBase):
     className: Optional[str] = None
     createdAt: datetime
     updatedAt: datetime
+    baseUrl: str  # <-- Add this line
 
     class Config:
         orm_mode = True
