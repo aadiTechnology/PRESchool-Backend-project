@@ -8,16 +8,13 @@ class NoticeBase(BaseModel):
     classId: Optional[int] = Field(None, description="Target class ID, null for all classes")
     date: date
     attachments: Optional[List[str]] = []
+    divisionId: Optional[int]  # New field
 
 class NoticeCreate(NoticeBase):
     pass
 
-class NoticeUpdate(BaseModel):
-    title: Optional[str]
-    content: Optional[str]
-    classId: Optional[int]
-    date: Optional[date]
-    attachments: Optional[List[str]]
+class NoticeUpdate(NoticeBase):
+    pass
 
 class NoticeOut(NoticeBase):
     id: int

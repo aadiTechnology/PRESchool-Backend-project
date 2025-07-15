@@ -11,7 +11,8 @@ def create_notice(db: Session, data, preschool_id: int, user_id: int):
         preschoolId=preschool_id,
         createdBy=user_id,
         date=data.date,
-        attachments=attachments
+        attachments=attachments,
+        divisionId=data.divisionId  # Accept divisionId
     )
     db.add(notice)
     db.commit()
