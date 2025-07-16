@@ -95,7 +95,7 @@ def list_homeworks(
     results = query.all()
     output = []
     tenant_id = str(current["preschoolId"])
-    base_url = f"{settings.API_URL}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
+    base_url = f"{settings.API_URL}/{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
     for hw, subject_name in results:
         attachments_list = hw.attachments.split(",") if hw.attachments else []
         hw_dict = HomeworkOut(
@@ -199,7 +199,7 @@ def get_homework(
         raise HTTPException(status_code=404, detail="Homework not found")
     subject = db.query(Subject).filter(Subject.id == homework.subjectId).first()
     tenant_id = str(current["preschoolId"])
-    base_url = f"{settings.API_URL}{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
+    base_url = f"{settings.API_URL}/{settings.HOMEWORK_UPLOAD_DIR}/{tenant_id}/"
     return HomeworkOut(
         id=homework.id,
         divisionId=homework.divisionId,
