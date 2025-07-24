@@ -15,7 +15,7 @@ class AttendanceOut(BaseModel):
     id: int
     userId: int
     divisionId: int
-    scanTime: Optional[datetime] = None  # <-- This is correct
+    scanTime: Optional[str] = None  # <-- Change to str
     date: date
     status: str
     createdAt: datetime

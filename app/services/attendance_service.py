@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.attendance import Attendance
 from app.models.user import User
-from datetime import datetime, date  # <-- Add this import
+from datetime import datetime, date
 
 def mark_attendance_teacher(db: Session, division_id: int, date_: date, attendance_list: list):
     for item in attendance_list:
@@ -49,11 +49,15 @@ def get_attendance_for_division_date(db: Session, division_id: int, date_: date)
     result = []
     for idx, s in enumerate(students, start=1):
         att = attendance_map.get(s.id)
+        # Format scanTime if present
+        scan_time_str = (
+            att.scanTime.strftime("%d-%m-%Y %I:%M %p") if att and att.scanTime else None
+        )
         result.append({
-            "id": att.id if att else idx,  # <-- Use idx or 0 instead of None
+            "id": att.id if att else idx,
             "userId": s.id,
             "divisionId": division_id,
-            "scanTime": att.scanTime if att and att.scanTime else None,
+            "scanTime": scan_time_str,  # <-- Formatted string
             "date": date_,
             "status": att.status if att else "Absent",
             "createdAt": att.createdAt if att else datetime.now(),
