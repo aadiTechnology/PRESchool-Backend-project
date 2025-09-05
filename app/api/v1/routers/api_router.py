@@ -12,6 +12,7 @@ from app.api.v1.routers import notice
 from app.api.v1.routers import syllabus
 from app.api.v1.routers import attendance
 from app.api.v1.routers import my_child_attendance
+from app.api.v1.routers import attendance_scanner
 
 api_router = APIRouter()
 
@@ -28,3 +29,5 @@ api_router.include_router(notice.router, tags=["notice"])
 api_router.include_router(syllabus.router, tags=["syllabus"])
 api_router.include_router(attendance.router, tags=["attendance"])
 api_router.include_router(my_child_attendance.router, tags=["my_child_attendance"])
+
+api_router.include_router(attendance_scanner.router, tags=["attendance_scanner"])
