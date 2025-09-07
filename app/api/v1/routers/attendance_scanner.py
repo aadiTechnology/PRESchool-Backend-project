@@ -25,7 +25,6 @@ def scan_attendance(
 ):
     qr_data = data.qr_code
     user_id = qr_data.id
-    child_name = qr_data.childName
     first_name = qr_data.firstName
     last_name = qr_data.lastName
     role = str(qr_data.role)
@@ -33,10 +32,7 @@ def scan_attendance(
     user = None
     if user_id and last_name and role:
         query = db.query(User).filter(User.id == user_id)
-        if role == "3":  # Student
-            if child_name:
-                query = query.filter(func.lower(User.childName) == child_name.lower())
-        elif role == "1":  # Teacher
+        if role == "1" or role == "3":  # Teacher
             if first_name:
                 query = query.filter(func.lower(User.firstName) == first_name.lower())
         query = query.filter(func.lower(User.lastName) == last_name.lower())
@@ -97,15 +93,12 @@ def scan_attendance(
         Attendance.date == today,
         Attendance.status == "Present"
     ).count()
-
+    display_name = f"{user.firstName} {user.lastName}"
     if str(user.role) == "2":
-        display_name = f"{user.firstName} {user.lastName}"
         user_role = "Teacher"
     elif str(user.role) == "3":
-        display_name = f"{user.childName} {user.lastName}"
         user_role = "Student"
     else:
-        display_name = f"{user.firstName} {user.lastName}"
         user_role = "Admin"
 
     # If already marked, return info with last scan time and custom message
@@ -225,13 +218,7 @@ def save_attendance(
     db.add(new_att)
     db.commit()
 
-    # Custom message logic
-    if str(user.role) == "2":  # Teacher
-        display_name = f"{user.firstName} {user.lastName}"
-    elif str(user.role) == "3":  # Student
-        display_name = f"{user.childName} {user.lastName}"
-    else:
-        display_name = f"{user.firstName} {user.lastName}"
+    display_name = f"{user.firstName} {user.lastName}"
 
     return {
         "status": "success",

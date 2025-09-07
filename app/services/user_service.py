@@ -15,7 +15,7 @@ def create_user(db: Session, user: UserCreate):
         classId=user.classId if user.role in [2, 3] else None,         # <-- Allow for Teacher and Parent
         divisionId=user.divisionId if user.role in [2, 3] else None,   # <-- Allow for Teacher and Parent
         qualification=user.qualification if user.role == 2 else None,
-        childName=user.childName if user.role == 3 else None,
+        fatherName=user.fatherName if user.role == 3 else None,  
         childAge=user.childAge if user.role == 3 else None,
     )
     db.add(db_user)

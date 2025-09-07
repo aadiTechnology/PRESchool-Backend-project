@@ -17,7 +17,7 @@ class User(Base):
     # Teacher fields
     qualification = Column(String, nullable=True)
     # Parent fields
-    childName = Column(String, nullable=True)
+    fatherName = Column(String, nullable=True) 
     childAge = Column(Integer, nullable=True)
     otp = Column(String, nullable=True)
     otpExpiry = Column(DateTime, nullable=True)

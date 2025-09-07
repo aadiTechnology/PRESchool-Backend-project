@@ -31,7 +31,6 @@ class AttendanceOut(BaseModel):
 
 class QRCodeData(BaseModel):
     id: int
-    childName: Optional[str] = None
     firstName: Optional[str] = None
     lastName: str
     role: int

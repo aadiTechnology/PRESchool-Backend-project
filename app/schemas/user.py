@@ -17,7 +17,7 @@ class UserCreate(BaseModel):
     qualification: Optional[str] = None
 
     # Parent-specific fields
-    childName: Optional[str] = None
+    fatherName: Optional[str] = None  # <-- Rename from fatherName
     childAge: Optional[int] = None
 
     @model_validator(mode="after")
@@ -34,8 +34,8 @@ class UserCreate(BaseModel):
                 raise ValueError('classId is required for Parent registration')
             if not self.divisionId:
                 raise ValueError('divisionId is required for Parent registration')
-            if not self.childName:
-                raise ValueError('childName is required for Parent registration')
+            if not self.fatherName:  
+                raise ValueError('fatherName is required for Parent registration')
             if self.childAge is None:
                 raise ValueError('childAge is required for Parent registration')
         return self
@@ -50,7 +50,7 @@ class UserUpdate(BaseModel):
     classId: Optional[int] = None
     divisionId: Optional[int] = None
     qualification: Optional[str] = None
-    childName: Optional[str] = None
+    fatherName: Optional[str] = None  
     childAge: Optional[int] = None
 
 class UserOut(BaseModel):
@@ -64,7 +64,7 @@ class UserOut(BaseModel):
     classId: Optional[int] = None
     divisionId: Optional[int] = None
     qualification: Optional[str] = None
-    childName: Optional[str] = None
+    fatherName: Optional[str] = None  
     childAge: Optional[int] = None
 
     class Config:
@@ -83,7 +83,7 @@ class UserListOut(BaseModel):
     className: Optional[str] = None         # <-- Add this
     divisionName: Optional[str] = None      # <-- Add this
     qualification: Optional[str] = None
-    childName: Optional[str] = None
+    fatherName: Optional[str] = None 
     childAge: Optional[int] = None
 
     class Config:
